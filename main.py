@@ -16,6 +16,28 @@ basestore = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
+bigbase = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+
 #Gonna start by just specifying using regular coordinates.
 
 basestart = [0, 6]
@@ -85,7 +107,7 @@ def findPath(itemA, itemB, store):
     path = []
 
     #Currently just checking whether in top/bot rows. Should add check for adjacent cols as well.
-    if (itemA[0] == 1) or (itemA[0] == 2) or (itemB[0] == 1) or (itemB[0] == 2) or (itemA[0] == len(store)-1) or (itemA[0] == len(store)-2) or (itemB[0] == len(store)-1) or (itemB[0] == len(store)-2)\
+    if (itemA[0] == 1) or (itemA[0] == 2) or (itemB[0] == 1) or (itemB[0] == 2) or (itemA[0] == len(store)-2) or (itemA[0] == len(store)-3) or (itemB[0] == len(store)-2) or (itemB[0] == len(store)-3)\
             or (abs(itemA[1]-itemB[1]) < 1):
 
         steps += abs(itemA[1] - itemB[1]) + abs(itemA[0] - itemB[0])
@@ -111,7 +133,62 @@ def findPath(itemA, itemB, store):
 
         return steps, path
     else:
-        return 0, 0
+        #Current plan is to model going over and under, and take the fastest route.
+
+        upperRoute = abs(2-itemA[0]) + abs(itemA[1] - itemB[1]) + abs(2-itemB[0])
+        lowerRoute = abs((len(store)-3)-itemA[0]) + abs(itemA[1] - itemB[1]) + abs((len(store)-3)-itemB[0])
+        print(len(store))
+        print(upperRoute, lowerRoute)
+
+        if upperRoute <= lowerRoute:
+            steps = upperRoute
+
+            currentPos = itemA
+            verticalStepsOne = abs(2 - itemA[0])
+            for i in range(1, verticalStepsOne + 1):
+                currentPos[0] = currentPos[0] - 1
+                path.append([currentPos[0], currentPos[1]])
+
+            horizontalSteps = abs(itemA[1] - itemB[1])
+            for i in range(1, horizontalSteps + 1):
+                if itemA[1] > itemB[1]:
+                    currentPos[1] = currentPos[1] - 1
+                    path.append([currentPos[0], currentPos[1]])
+                else:
+                    currentPos[1] = currentPos[1] + 1
+                    path.append([currentPos[0], currentPos[1]])
+
+            verticalStepsTwo = abs(2 - itemB[0])
+            for i in range(1, verticalStepsTwo + 1):
+                print("hello")
+                currentPos[0] = currentPos[0] + 1
+                path.append([currentPos[0], currentPos[1]])
+
+        else:
+            steps = lowerRoute
+
+            currentPos = itemA
+            verticalStepsOne = abs((len(store)-3) - itemA[0])
+            for i in range(1, verticalStepsOne + 1):
+                currentPos[0] = currentPos[0] + 1
+                path.append([currentPos[0], currentPos[1]])
+
+            horizontalSteps = abs(itemA[1] - itemB[1])
+            for i in range(1, horizontalSteps + 1):
+                if itemA[1] > itemB[1]:
+                    currentPos[1] = currentPos[1] - 1
+                    path.append([currentPos[0], currentPos[1]])
+                else:
+                    currentPos[1] = currentPos[1] + 1
+                    path.append([currentPos[0], currentPos[1]])
+
+            verticalStepsTwo = abs((len(store)-3) - itemB[0])
+            for i in range(1, verticalStepsTwo + 1):
+                currentPos[0] = currentPos[0] - 1
+                path.append([currentPos[0], currentPos[1]])
+
+
+        return steps, path
 
 
 def firstSolution(store, start, items):
@@ -127,7 +204,7 @@ def firstSolution(store, start, items):
 
 #firstSolution(basestore, basestart, baseitems)
 
-steps, path = findPath([3, 2], [7, 1], basestore)
+steps, path = findPath([4, 2], [3, 11], basestore)
 print(steps)
 print(path)
 
