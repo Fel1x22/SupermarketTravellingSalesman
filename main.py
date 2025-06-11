@@ -67,8 +67,11 @@ def printStore(store):
 
     line = ""
     line += "╔"
-    for i in range(cols-2):
-        line += "═"
+    for i in range(1, cols-1):
+        if store[0][i] == 1:
+            line += "═"
+        elif store[0][i] == -1:
+            line += "O"
     line += "╗"
     out.append(line)
 
@@ -120,6 +123,14 @@ def textToCoord(input, store):
     Row = (len(store)-4) - int(input[2:])
     return Row, Col
 
+def textListToCoordList(inputList, store):
+    out = []
+    for input in inputList:
+        Row, Col = textToCoord(input, store)
+        out.append([Row, Col])
+
+    return out
+
 
 
 #Find shortest path between two specified items in a given store
@@ -128,9 +139,34 @@ def findPath(itemA, itemB, store):
     #Right now im unsure how to represent the paths, should they include start and dest?
     path = []
 
-    #Currently just checking whether in top/bot rows. Should add check for adjacent cols as well.
-    if (itemA[0] == 1) or (itemA[0] == 2) or (itemB[0] == 1) or (itemB[0] == 2) or (itemA[0] == len(store)-2) or (itemA[0] == len(store)-3) or (itemB[0] == len(store)-2) or (itemB[0] == len(store)-3)\
-            or (abs(itemA[1]-itemB[1]) < 1):
+    #Note!! Currently my logic assumes that the start/end point is not on the same column as a wall.
+    #As otherwise it would sidestep into the wall next to the entrance before going down. Which is not good.
+
+    if (abs(itemA[1]-itemB[1]) == 0 and (itemA[1] % 3 == 0)):
+        #Take one step right, go down aisle then go one back left.
+        currentPos = itemA
+        steps += 2 + abs(itemA[0] - itemB[0])
+
+        currentPos[1] = currentPos[1] + 1
+        path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(itemA[0] - itemB[0])
+        for i in range(1, verticalSteps + 1):
+            if itemA[0] > itemB[0]:
+                currentPos[0] = currentPos[0] - 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] = currentPos[0] + 1
+                path.append([currentPos[0], currentPos[1]])
+
+
+        currentPos[1] = currentPos[1] - 1
+        path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+        #Currently just checking whether in top/bot rows. Should add check for adjacent cols as well.
+    elif (itemA[0] == 1) or (itemA[0] == 2) or (itemB[0] == 1) or (itemB[0] == 2) or (itemA[0] == len(store)-2) or (itemA[0] == len(store)-3) or (itemB[0] == len(store)-2) or (itemB[0] == len(store)-3)\
+            or (abs(itemA[1]-itemB[1]) == 1) or (abs(itemA[1]-itemB[1]) == 0):
 
         steps += abs(itemA[1] - itemB[1]) + abs(itemA[0] - itemB[0])
         currentPos = itemA
@@ -226,11 +262,13 @@ def firstSolution(store, start, items):
 
 #firstSolution(basestore, basestart, baseitems)
 
-steps, path = findPath([4, 2], [3, 11], basestore)
+"""steps, path = findPath([4, 2], [3, 11], basestore)
 print(steps)
-print(path)
+print(path)"""
 
-Row, Col = textToCoord("4L12", bigbase)
-print(Row, Col)
+inputs = textListToCoordList(["1T", "1B"], bigbase)
+print(inputs)
 
-printWithItems(bigbase, [[Row, Col]])
+printWithItems(bigbase, inputs)
+
+print(findPath(inputs[0], inputs[1], bigbase))
