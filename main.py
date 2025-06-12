@@ -1,6 +1,12 @@
 from itertools import permutations
 from random import choice
 
+#TODO:
+#Change program to work with stores of any size: multiple functions
+#Error checking!!
+#Find a way to check best path from upcoming functions: maybe brute force?
+
+
 #Aim is to store each location as a square on a grid
 #Translate from base store notation into the grid form?
 
@@ -79,7 +85,7 @@ def generatePositions(amt):
             bay = ""
         final = aisle + side + bay
 
-        if final != "12B" and final != "12T":
+        if final != "12B" and final != "12T" and final not in positions:
             positions.append(final)
     return positions
 
@@ -332,20 +338,14 @@ def firstSolution(store, start, items):
 
     i = 0
     while i < len(stops)-1:
-        """print("Stops:", stops)
-        print("i", i)
-        print("ItemA:", stops[i])
-        print("ItemB", stops[i+1])"""
         tempSteps, tempPath = findPath(stops[i].copy(), stops[i+1].copy(), store)
         #print(tempPath)
         steps += tempSteps
-        #print("path before extending:", finalpath)
         finalpath.extend(tempPath)
-        #print("path after: ", finalpath)
         i = i + 1
     finalpath.append(start)
 
-    return steps, finalpath
+    return steps, finalpath, stops
 
 
 
@@ -356,18 +356,59 @@ def bruteForce(store, items):
 
     bestSteps = 1000000
     bestPath = []
+    bestOrder = []
 
     for order in perms:
-        tempSteps, tempPath = firstSolution(store, bigstart, order)
+        tempSteps, tempPath, tempOrder = firstSolution(store, bigstart, order)
         if tempSteps < bestSteps:
             bestSteps = tempSteps
             bestPath = tempPath
+            bestOrder = tempOrder
 
-    return bestSteps, bestPath
+    return bestSteps, bestPath, bestOrder
 
-#firstSolution(basestore, basestart, baseitems)
-testItem = [[1, 1]]
-#printWithItems(bigbase, baseitems)
+def greedyAlgo(store, items, start):
+
+    steps = 0
+    path = []
+    order = []
+
+    fakeStart = [start[0] + 1, start[1]]
+
+    toVisit = [fakeStart]
+    toVisit.extend(items)
+
+    currentPos = start
+
+    while len(toVisit) > 0:
+        closestDist = 10000000
+        closestItem = None
+        for item in toVisit:
+            distance, path = findPath(currentPos, item, store)
+            if distance < closestDist:
+                closestDist = distance
+                closestItem = item
+
+        tempSteps, tempPath = findPath(currentPos, closestItem, store)
+        steps += tempSteps
+        path.extend(tempPath)
+
+        currentPos = closestItem.copy()
+        order.append(currentPos)
+
+        toVisit.remove(closestItem)
+
+    tempSteps, tempPath = findPath(currentPos, fakeStart, store)
+
+    steps += tempSteps
+    path.append(tempPath)
+
+    steps += 1
+    path.append(start)
+
+    return steps, path, order
+
+
 
 
 
@@ -377,8 +418,18 @@ print("")
 print("BruteForce: ")
 print(bruteForce(bigbase, baseitems))"""
 
-positions = generatePositions(5)
+positions = generatePositions(6)
 
 print(positions)
 printWithItems(bigbase, textListToCoordList(positions, bigbase))
+brute = list(bruteForce(bigbase, textListToCoordList(positions, bigbase)))
+print("Brute Force:")
+print(brute[0])
+print(brute[1])
+print(brute[2])
 
+greedy = list(greedyAlgo(bigbase, textListToCoordList(positions, bigbase), bigstart))
+print("Greedy:")
+print(greedy[0])
+print(greedy[1])
+print(greedy[2])
