@@ -320,7 +320,7 @@ def findPath(itemA, itemB, store):
 #Naive solution that places items in the order they're listed. No thought about distances.
 #Looks like its working!
 def firstSolution(store, start, items):
-    steps = 0
+    steps = 1
 
 
     #Program runs into difficulty when dealing with the start zone, since its a row above. TO solve this, im gonna
@@ -339,11 +339,11 @@ def firstSolution(store, start, items):
     i = 0
     while i < len(stops)-1:
         tempSteps, tempPath = findPath(stops[i].copy(), stops[i+1].copy(), store)
-        #print(tempPath)
         steps += tempSteps
         finalpath.extend(tempPath)
         i = i + 1
     finalpath.append(start)
+    steps += 1
 
     return steps, finalpath, stops
 
@@ -380,28 +380,50 @@ def greedyAlgo(store, items, start):
 
     currentPos = start
 
+    #print("Variables at start: ", start, fakeStart, toVisit, currentPos)
+
+
     while len(toVisit) > 0:
+        tempSteps, tempPath = 0, []
+
         closestDist = 10000000
         closestItem = None
-        for item in toVisit:
-            distance, path = findPath(currentPos, item, store)
-            if distance < closestDist:
-                closestDist = distance
-                closestItem = item
+        closestPath = []
 
-        tempSteps, tempPath = findPath(currentPos, closestItem, store)
-        steps += tempSteps
-        path.extend(tempPath)
+        for item in toVisit:
+            tempDist, tempPath = findPath(currentPos.copy(), item.copy(), store)
+            if tempDist < closestDist:
+                closestDist = tempDist
+                closestItem = item.copy()
+                closestPath = tempPath
+
+        """ print("TempSteps: ", closestDist)
+        print("TempPath: ", closestPath)
+        print("Closest Item: ", closestItem)"""
+
+        steps += closestDist
+        #print("Path Before : ", path)
+        path.extend(closestPath)
+        #print("Path After : ", path)
 
         currentPos = closestItem.copy()
         order.append(currentPos)
 
         toVisit.remove(closestItem)
 
+
+        """print("Path at this point: ", path)
+        print("")
+        print("Visited: ", order)
+        print("To Visit: ", toVisit)
+        print("")
+        print("")"""
+
     tempSteps, tempPath = findPath(currentPos, fakeStart, store)
 
     steps += tempSteps
-    path.append(tempPath)
+    path.extend(tempPath)
+    order.append(fakeStart)
 
     steps += 1
     path.append(start)
@@ -410,15 +432,10 @@ def greedyAlgo(store, items, start):
 
 
 
-
-
-"""print("First: ")
-print(firstSolution(bigbase, bigstart, baseitems))
-print("")
-print("BruteForce: ")
-print(bruteForce(bigbase, baseitems))"""
-
 positions = generatePositions(6)
+
+#positions = ["7L16"]
+
 
 print(positions)
 printWithItems(bigbase, textListToCoordList(positions, bigbase))
@@ -433,3 +450,14 @@ print("Greedy:")
 print(greedy[0])
 print(greedy[1])
 print(greedy[2])
+
+print("")
+print("First: ")
+print(firstSolution(bigbase, bigstart, textListToCoordList(positions, bigbase)))
+
+
+print("")
+print(brute[1])
+print(greedy[1])
+print(len(brute[1]))
+print(len(greedy[1]))
