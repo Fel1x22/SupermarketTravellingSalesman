@@ -1,3 +1,6 @@
+from itertools import permutations
+from random import choice
+
 #Aim is to store each location as a square on a grid
 #Translate from base store notation into the grid form?
 
@@ -60,6 +63,27 @@ bigstart = [0, 19]
 
 #How to decide which way round the aisles to move when getting another item?
 
+def generatePositions(amt):
+    aisles = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    sides = ["L", "R", "T", "B"]
+    bays = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"]
+
+    positions = []
+
+    for i in range(amt):
+        aisle = choice(aisles)
+        side = choice(sides)
+        if side != "T" and side != "B":
+            bay = choice(bays)
+        else:
+            bay = ""
+        final = aisle + side + bay
+
+        if final != "12B" and final != "12T":
+            positions.append(final)
+    return positions
+
+
 #Converts initial grid to ascii version
 def printStore(store):
     rows = len(store)
@@ -105,24 +129,39 @@ def printWithItems(store, itemList):
         newRow = row[:item[1]] + "*" + row[item[1] + 1:]
         storePic[item[0]] = newRow
 
-    for line in storePic:
-        print(line)
+    numberrow = "•"
+    for i in range(len(storePic[0])):
+        numberrow += "•"
+
+    print(numberrow)
+    for line in range(len(storePic)):
+        print("•" + storePic[line])
 
 def textToCoord(input, store):
-    Col = 1 + 3*(int(input[0])-1)
+    #Currently no way to address top and bottom rows of the store, maybe add soon?
+    aisle = input[0]
+    if input[1] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+        aisle += input[1]
+        pos = input[2]
+        bay = input[3:]
+    else:
+        pos = input[1]
+        bay = input[2:]
 
-    if input[1] == "R":
+    Col = 1 + 3*(int(aisle)-1)
+
+    if pos == "R":
         Col += 1
-    elif input[1] == "T":
+    elif pos == "T":
         Col += 2
         Row =  2
         return Row, Col
-    elif input[1] == "B":
+    elif pos == "B":
         Col += 2
         Row = len(store)-3
         return Row, Col
 
-    Row = (len(store)-4) - int(input[2:])
+    Row = (len(store)-3) - int(bay)
     return Row, Col
 
 def textListToCoordList(inputList, store):
@@ -310,13 +349,36 @@ def firstSolution(store, start, items):
 
 
 
-#def bruteForce(store, items):
+def bruteForce(store, items):
+    perms = []
+    for perm in permutations(items):
+        perms.append(list(perm))
 
+    bestSteps = 1000000
+    bestPath = []
+
+    for order in perms:
+        tempSteps, tempPath = firstSolution(store, bigstart, order)
+        if tempSteps < bestSteps:
+            bestSteps = tempSteps
+            bestPath = tempPath
+
+    return bestSteps, bestPath
 
 #firstSolution(basestore, basestart, baseitems)
 testItem = [[1, 1]]
-printWithItems(bigbase, baseitems)
+#printWithItems(bigbase, baseitems)
 
 
 
+"""print("First: ")
 print(firstSolution(bigbase, bigstart, baseitems))
+print("")
+print("BruteForce: ")
+print(bruteForce(bigbase, baseitems))"""
+
+positions = generatePositions(5)
+
+print(positions)
+printWithItems(bigbase, textListToCoordList(positions, bigbase))
+
