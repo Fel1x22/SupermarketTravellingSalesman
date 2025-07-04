@@ -1,5 +1,6 @@
 from itertools import permutations
 from random import choice
+import time
 
 #TODO:
 #Change program to work with stores of any size: multiple functions
@@ -430,21 +431,90 @@ def greedyAlgo(store, items, start):
 
     return steps, path, order
 
+#Improved brute force helper function, returns 0 0 0 if the current solution is worse than the best seen.
+def improvedBFHelper(store, start, items, best):
+    steps = 1
+
+    # Program runs into difficulty when dealing with the start zone, since its a row above. TO solve this, im gonna
+    # basically make the square in front the start/stop, then manually make the first/final steps.
+
+    fakeStart = [start[0] + 1, start[1]]
+    finalpath = [fakeStart]
+    # print("Path at start", finalpath)
+
+    stops = [fakeStart]
+    stops.extend(items)
+    stops.append(fakeStart)
+
+    i = 0
+    while i < len(stops) - 1:
+        tempSteps, tempPath = findPath(stops[i].copy(), stops[i + 1].copy(), store)
+        steps += tempSteps
+        finalpath.extend(tempPath)
+        i = i + 1
+
+        if steps > best:
+            return 0, 0, 0
+    finalpath.append(start)
+    steps += 1
+
+    if steps > best:
+        return 0, 0, 0
+
+    return steps, finalpath, stops
 
 
-positions = generatePositions(6)
+
+
+#Improved brute force: will be the same, but if a solution exceeds the current best seen, then it will not be considered further.
+def improvedBruteForce(store, items):
+    perms = []
+    for perm in permutations(items):
+        perms.append(list(perm))
+
+    bestSteps = 1000000
+    bestPath = []
+    bestOrder = []
+
+    for order in perms:
+        tempSteps, tempPath, tempOrder = improvedBFHelper(store, bigstart, order, bestSteps)
+        if tempSteps != 0 and tempSteps < bestSteps:
+            bestSteps = tempSteps
+            bestPath = tempPath
+            bestOrder = tempOrder
+
+    return bestSteps, bestPath, bestOrder
+
+
+
+
+
+
+positions = generatePositions(12)
 
 #positions = ["7L16"]
 
 
 print(positions)
 printWithItems(bigbase, textListToCoordList(positions, bigbase))
+
+timer = time.time()
+impBrute = list(improvedBruteForce(bigbase, textListToCoordList(positions, bigbase)))
+print("Improved Brute Force:")
+print(impBrute[0])
+print(impBrute[1])
+print(impBrute[2])
+print("Time Taken: " + str(time.time() - timer))
+
+timer = time.time()
 brute = list(bruteForce(bigbase, textListToCoordList(positions, bigbase)))
 print("Brute Force:")
 print(brute[0])
 print(brute[1])
 print(brute[2])
+print("Time Taken: " + str(time.time() - timer))
 
+"""
 greedy = list(greedyAlgo(bigbase, textListToCoordList(positions, bigbase), bigstart))
 print("Greedy:")
 print(greedy[0])
@@ -460,4 +530,4 @@ print("")
 print(brute[1])
 print(greedy[1])
 print(len(brute[1]))
-print(len(greedy[1]))
+print(len(greedy[1]))"""
