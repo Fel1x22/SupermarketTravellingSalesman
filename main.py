@@ -11,9 +11,6 @@ import time
 #Aim is to store each location as a square on a grid
 #Translate from base store notation into the grid form?
 
-#How to store each square? As list of distances? That doesnt make sense
-
-#m rows and n columns
 basestore = [
     [1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -51,13 +48,163 @@ bigbase = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
-#Gonna start by just specifying using regular coordinates.
-
 basestart = [0, 6]
 
 baseitems = [[3, 2], [4, 2], [3, 11], [7, 10]]
 
 bigstart = [0, 19]
+
+def buildStore(aisles, aisleLength):
+    matrixWidth = 3 * aisles + 1
+    matrixHeight = aisleLength + 6
+
+    final = []
+
+    for i in range(matrixHeight):
+        if i == 0:
+            newRow = [1]*matrixWidth
+            newRow[int(matrixWidth/2)] = -1
+            final.append(newRow)
+        elif i == matrixHeight-1:
+            newRow = [1]*matrixWidth
+            final.append(newRow)
+        elif i == 1 or i == 2 or i == matrixHeight-2 or i == matrixHeight-3:
+            newRow = [0]*matrixWidth
+            newRow[0] = 0
+            newRow[matrixWidth-1] = 1
+            final.append(newRow)
+        else:
+            newRow = [1, 0, 0]*aisles
+            newRow.append(1)
+            final.append(newRow)
+
+    return final
+
+def itemPlace(store):
+    opt = input("Would you like a random set of items (R) or place them manually (M)?")
+    items = []
+    if opt == "R":
+        amt = int(input("How many items would you like to place?"))
+        items = generatePositions(amt, store)
+        print("Item List Generated")
+        print(items)
+        return textListToCoordList(items, store)
+    elif opt == "M":
+        item = input("Enter the item you wish to place (Q to quit):\n")
+        while item != "Q":
+            items.append(item)
+            item = input("Enter the item you wish to place (Q to quit):\n")
+        return textListToCoordList(items, store)
+
+
+def start():
+    storeChoice = ""
+    while storeChoice != "1" and storeChoice != "2" and storeChoice != "3":
+        storeChoice = input("""
+    Which store would you like to use?
+    1. Small
+    2. Large
+    3. Custom
+    : """)
+        if storeChoice == "1":
+            store = basestore
+        elif storeChoice == "2":
+            store = bigbase
+        elif storeChoice == "3":
+            aisles = int(input("Enter the number of Aisles: \n"))
+            length = int(input("Enter the length of the Aisles: \n"))
+            store = buildStore(aisles, length)
+        else:
+            print("Invalid option chosen.")
+
+    items = []
+    printWithItems(store, items)
+
+    while True:
+        print("")
+        print("What would you like to do?")
+        optionChoice = input("""
+    1. Chose item locations
+    2. Run an algorithm on your store
+    3. Return to store select
+    4. Quit
+    : """)
+
+        if optionChoice == "1":
+            items = itemPlace(store)
+            printWithItems(store, items)
+        elif optionChoice == "2":
+            #Need check to see if items have been added.
+            if items == []:
+                print("Error. No items have been added.")
+            else:
+                algo = ""
+                while algo != "1" and algo != "2" and algo != "3" and algo != "4" and algo != "5":
+                    algo = input("""Which algorithm would you like to use?
+1. First solution found
+2. Brute Force
+3. Brute Force with Pruning
+4. Greedy Algorithm
+5. Branch and Bound (WIP)
+: """)
+
+                if algo == "1":
+                    print("Running First Solution Found Algorithm on your store:")
+                    print("")
+                    t = time.time()
+                    result = list(firstSolution(store, items))
+                    timeTaken = time.time() - t
+                    print("Steps taken: " + str(result[0]))
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+                    print("Time taken: " + str(round(timeTaken*1000, 4)) + "ms")
+                if algo == "2":
+                    print("Running Brute Force Algorithm on your store:")
+                    print("")
+                    t = time.time()
+                    result = list(bruteForce(store, items))
+                    timeTaken = time.time() - t
+                    print("Steps taken: " + str(result[0]))
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+                    print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
+                if algo == "3":
+                    print("Running Brute Force with Pruning Algorithm on your store:")
+                    print("")
+                    t = time.time()
+                    result = list(improvedBruteForce(store, items))
+                    timeTaken = time.time() - t
+                    print("Steps taken: " + str(result[0]))
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+                    print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
+                if algo == "4":
+                    print("Running Greedy Algorithm on your store:")
+                    print("")
+                    t = time.time()
+                    result = list(greedyAlgo(store, items))
+                    timeTaken = time.time() - t
+                    print("Steps taken: " + str(result[0]))
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+                    print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
+                if algo == "5":
+                    pass
+
+
+
+
+        elif optionChoice == "3":
+            start()
+        elif optionChoice == "4":
+            quit()
+        else:
+            print("Invalid option chosen.")
+
+
+
+
+
 
 #We can make assumptions about the layout of the store to make traversing much easier
 #So that we dont have to search to find an optimal route between items.
@@ -68,16 +215,32 @@ bigstart = [0, 19]
 #empty to allow walking between aisles, then no matter if there are walls preventing our initial strategy,
 #The maximum amount of vertical steps will be m - 3
 
-#How to decide which way round the aisles to move when getting another item?
+def generatePositions(amt, store):
 
-def generatePositions(amt):
-    aisles = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    #matrixWidth = 3 * aisles + 1
+    #matrixHeight = aisleLength + 6
+
+    numAisles = int((len(store[0]) - 1) / 3)
+    aisleHeight = int(len(store) - 6)
+
+    aisles = []
+    for i in range(1, numAisles + 1):
+        aisles.append(str(i))
+
+    bays = []
+    for i in range(1, aisleHeight + 1):
+        bays.append(str(i))
+
     sides = ["L", "R", "T", "B"]
-    bays = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"]
+
+    print(aisles)
+    print(bays)
 
     positions = []
 
-    for i in range(amt):
+    i = 0
+
+    while i < amt:
         aisle = choice(aisles)
         side = choice(sides)
         if side != "T" and side != "B":
@@ -86,8 +249,9 @@ def generatePositions(amt):
             bay = ""
         final = aisle + side + bay
 
-        if final != "12B" and final != "12T" and final not in positions:
+        if final != (aisles[-1] + "T") and final != (aisles[-1] + "B") and final not in positions:
             positions.append(final)
+            i += 1
     return positions
 
 
@@ -320,9 +484,17 @@ def findPath(itemA, itemB, store):
 
 #Naive solution that places items in the order they're listed. No thought about distances.
 #Looks like its working!
-def firstSolution(store, start, items):
+def firstSolution(store, items):
     steps = 1
 
+    #Change to mean we don't need to pass start in, it will find it itself.
+    i = 0
+    for j in store[0]:
+        if j == -1:
+            break
+        else:
+            i += 1
+    start = [0, i]
 
     #Program runs into difficulty when dealing with the start zone, since its a row above. TO solve this, im gonna
     #basically make the square in front the start/stop, then manually make the first/final steps.
@@ -360,7 +532,7 @@ def bruteForce(store, items):
     bestOrder = []
 
     for order in perms:
-        tempSteps, tempPath, tempOrder = firstSolution(store, bigstart, order)
+        tempSteps, tempPath, tempOrder = firstSolution(store, order)
         if tempSteps < bestSteps:
             bestSteps = tempSteps
             bestPath = tempPath
@@ -368,7 +540,17 @@ def bruteForce(store, items):
 
     return bestSteps, bestPath, bestOrder
 
-def greedyAlgo(store, items, start):
+def greedyAlgo(store, items):
+
+    i = 0
+    for j in store[0]:
+        if j == -1:
+            break
+        else:
+            i += 1
+    start = [0, i]
+
+
 
     steps = 0
     path = []
@@ -490,11 +672,11 @@ def improvedBruteForce(store, items):
 
 
 
-positions = generatePositions(12)
+positions = generatePositions(12, bigbase)
 
 #positions = ["7L16"]
 
-
+"""
 print(positions)
 printWithItems(bigbase, textListToCoordList(positions, bigbase))
 
@@ -514,8 +696,8 @@ print(brute[1])
 print(brute[2])
 print("Time Taken: " + str(time.time() - timer))
 
-"""
-greedy = list(greedyAlgo(bigbase, textListToCoordList(positions, bigbase), bigstart))
+
+greedy = list(greedyAlgo(bigbase, textListToCoordList(positions, bigbase)))
 print("Greedy:")
 print(greedy[0])
 print(greedy[1])
@@ -523,7 +705,7 @@ print(greedy[2])
 
 print("")
 print("First: ")
-print(firstSolution(bigbase, bigstart, textListToCoordList(positions, bigbase)))
+print(firstSolution(bigbase, textListToCoordList(positions, bigbase)))
 
 
 print("")
@@ -531,3 +713,5 @@ print(brute[1])
 print(greedy[1])
 print(len(brute[1]))
 print(len(greedy[1]))"""
+
+start()
