@@ -189,7 +189,7 @@ def start():
                     print("Item Order: " + str(result[2]))
                     print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
                 if algo == "5":
-                    pass
+                    branchAndBound(store, items)
 
 
 
@@ -354,7 +354,11 @@ def findPath(itemA, itemB, store):
     #Note!! Currently my logic assumes that the start/end point is not on the same column as a wall.
     #As otherwise it would sidestep into the wall next to the entrance before going down. Which is not good.
 
-    if (abs(itemA[1]-itemB[1]) == 0 and (itemA[1] % 3 == 0)):
+
+    #bugfix! Currently if two items are both in the top two/bottom two rows, it does an extra sidestep.
+    #only really relevant rn when moving off from start/back to end.
+    if (abs(itemA[1]-itemB[1]) == 0 and (itemA[1] % 3 == 0) and not (itemA[0] in [1, 2]) and not (itemB[0] in [1, 2])\
+            and not (itemA[0] in [(len(store)-3), (len(store)-2)])and not (itemB[0] in [(len(store)-3), (len(store)-2)])):
         #Take one step right, go down aisle then go one back left.
         currentPos = itemA.copy()
         steps += 2 + abs(itemA[0] - itemB[0])
@@ -667,51 +671,48 @@ def improvedBruteForce(store, items):
 
     return bestSteps, bestPath, bestOrder
 
+def createAdjacencyMatrix(store, items):
+    #Finding start
+    i = 0
+    while i < len(store[0]):
+        if store[0][i] == -1:
+            break
+        i += 1
+    start = [0, i]
+    fakeStart = [1, start[1]]
+
+    nodes = [fakeStart]
+    nodes.extend(items)
+    print(nodes)
+
+    adj = []
+    for a in range(len(nodes)):
+        row = [0] * len(nodes)
+        adj.append(row)
+
+    i = 0
+
+    while i < len(nodes):
+        for j in range(i, len(nodes)):
+            if i == j:
+                continue
+            else:
+                steps, path = findPath(nodes[i], nodes[j], store)
+                adj[i][j], adj[j][i] = steps, steps
+        i += 1
+
+    for i in adj:
+        print(i)
 
 
 
+def branchAndBound(store, items):
+    #1. Create adjacency matrix.
+        #New func for this?
+        #NOTE: For this to work, we need to consider fakestart as a location in the adjacency matrix (node 0)
+    createAdjacencyMatrix(store, items)
 
 
-positions = generatePositions(12, bigbase)
-
-#positions = ["7L16"]
-
-"""
-print(positions)
-printWithItems(bigbase, textListToCoordList(positions, bigbase))
-
-timer = time.time()
-impBrute = list(improvedBruteForce(bigbase, textListToCoordList(positions, bigbase)))
-print("Improved Brute Force:")
-print(impBrute[0])
-print(impBrute[1])
-print(impBrute[2])
-print("Time Taken: " + str(time.time() - timer))
-
-timer = time.time()
-brute = list(bruteForce(bigbase, textListToCoordList(positions, bigbase)))
-print("Brute Force:")
-print(brute[0])
-print(brute[1])
-print(brute[2])
-print("Time Taken: " + str(time.time() - timer))
-
-
-greedy = list(greedyAlgo(bigbase, textListToCoordList(positions, bigbase)))
-print("Greedy:")
-print(greedy[0])
-print(greedy[1])
-print(greedy[2])
-
-print("")
-print("First: ")
-print(firstSolution(bigbase, textListToCoordList(positions, bigbase)))
-
-
-print("")
-print(brute[1])
-print(greedy[1])
-print(len(brute[1]))
-print(len(greedy[1]))"""
+    pass
 
 start()
