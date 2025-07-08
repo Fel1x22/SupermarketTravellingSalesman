@@ -117,7 +117,7 @@ def animateRoute(store, path, items):
     for i in path:
         os.system('clear')
         items = printWithItems(store, items, i)
-        time.sleep(0.5)
+        time.sleep(0.25)
 
 
 def start():
@@ -225,8 +225,13 @@ def start():
                 print("Animate the route taken? Y/N (Note: only works in terminal.)")
                 anim = input(":")
                 if anim == "Y":
-                    #print(result[1])
-                    animateRoute(store, result[1], items)
+                    animateRoute(store, result[1], items.copy())
+
+                    #Testing stuff
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+                    print("Actual Items: " + str(items))
+                    printWithItems(store, items)
 
 
 
@@ -410,8 +415,267 @@ def findPath(itemA, itemB, store):
 
     #bugfix! Currently if two items are both in the top two/bottom two rows, it does an extra sidestep.
     #only really relevant rn when moving off from start/back to end.
-    if (abs(itemA[1]-itemB[1]) == 0 and (itemA[1] % 3 == 0) and not (itemA[0] in [1, 2]) and not (itemB[0] in [1, 2])\
-            and not (itemA[0] in [(len(store)-3), (len(store)-2)])and not (itemB[0] in [(len(store)-3), (len(store)-2)])):
+
+    #This bugfix created a new bug!
+
+    #Rewriting this function
+    #Current cases: ###
+    #1. Items inside the same aisle
+    #2. Items inside different aisles
+    #3. One item on outside of aisle, one inside.
+    #4. Both items outside of aisles.
+
+
+    Arow, Acol, Brow, Bcol = itemA[0], itemA[1], itemB[0], itemB[1]
+
+    matrixRows = len(store)
+
+
+    #1: Both inside the same aisle.
+    if abs(Acol - Bcol) <= 1 and (2 < Arow < (matrixRows-3)) and (2 < Brow < (matrixRows-3)):
+        #print("one")
+        steps += abs(Acol - Bcol) + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        #Note for future optimisation, could create a helper function for this, to avoid repeated code.
+        horizontalSteps = abs(Acol - Bcol)
+        for i in range(1, horizontalSteps + 1):
+            if Acol > Bcol:
+                currentPos[1] -= 1
+                #Better way to append this?
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[1] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    #2: Items inside different columns
+    elif abs(Acol - Bcol) > 1 and (2 < Arow < (matrixRows-3)) and (2 < Brow < (matrixRows-3)):
+        #print("two")
+        #This is shite, can it be made better?
+
+        # Current plan is to model going over and under, and take the fastest route.
+        upperRoute = abs(2 - Arow) + abs(Acol - Bcol) + abs(2 - Brow)
+        lowerRoute = abs((matrixRows - 3) - Arow) + abs(Acol - Bcol) + abs((matrixRows - 3) - Brow)
+
+        if upperRoute <= lowerRoute:
+            steps = upperRoute
+
+            currentPos = itemA.copy()
+            verticalStepsOne = abs(2 - Arow)
+            for i in range(1, verticalStepsOne + 1):
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+
+            horizontalSteps = abs(Acol - Bcol)
+            for i in range(1, horizontalSteps + 1):
+                if Acol > Bcol:
+                    currentPos[1] -= 1
+                    path.append([currentPos[0], currentPos[1]])
+                else:
+                    currentPos[1] += 1
+                    path.append([currentPos[0], currentPos[1]])
+
+            verticalStepsTwo = abs(2 - Brow)
+            for i in range(1, verticalStepsTwo + 1):
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        else:
+            steps = lowerRoute
+
+            currentPos = itemA.copy()
+            verticalStepsOne = abs((len(store) - 3) - Arow)
+            for i in range(1, verticalStepsOne + 1):
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+            horizontalSteps = abs(Acol - Bcol)
+            for i in range(1, horizontalSteps + 1):
+                if Acol > Bcol:
+                    currentPos[1] -= 1
+                    path.append([currentPos[0], currentPos[1]])
+                else:
+                    currentPos[1] += 1
+                    path.append([currentPos[0], currentPos[1]])
+
+            verticalStepsTwo = abs((len(store) - 3) - Brow)
+            for i in range(1, verticalStepsTwo + 1):
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    #3: One item outside of aisle, one inside.
+    #Gonna split this one into two separate statements, as the order of horizontal/vertical moves depends
+    #On whether A is on the Outside or B
+
+    #NOTE: Might need to add logic here or somewhere else for the impossible spots above aisles.
+    elif ((2 < Arow < (matrixRows-3)) and (Brow <= 2 or (matrixRows-3) <= Brow)):
+        #print("three")
+        steps += abs(Acol - Bcol) + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        horizontalSteps = abs(Acol - Bcol)
+        for i in range(1, horizontalSteps + 1):
+            if Acol > Bcol:
+                currentPos[1] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[1] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    #Aitem outside, Bitem inside aisle.
+    elif ((Arow <= 2 or (matrixRows-3) <= Arow) and (2 < Brow < (matrixRows-3))):
+        #print("four")
+        print(matrixRows)
+        steps += abs(Acol - Bcol) + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        horizontalSteps = abs(Acol - Bcol)
+        for i in range(1, horizontalSteps + 1):
+            if Acol > Bcol:
+                currentPos[1] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[1] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+
+
+        return steps, path
+
+    #4: Both items outside of aisles. Think it would be smart to split again, into cases where both are
+    #same end of store, vs different ends.
+
+    #This one maybe can be combined with a previous one, very similar body.
+    elif (Arow <= 2 and Brow <= 2) or ((matrixRows-3) <= Arow and (matrixRows-3) <= Brow):
+        #print("five")
+        steps += abs(Acol - Bcol) + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        horizontalSteps = abs(Acol - Bcol)
+        for i in range(1, horizontalSteps + 1):
+            if Acol > Bcol:
+                currentPos[1] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[1] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    elif ((Arow <= 2 and (matrixRows - 3) <= Brow) or ((matrixRows - 3) <= Arow and Brow <= 2)) and (Acol == Bcol):
+        #print("six")
+        steps += 2 + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        #One right step
+        currentPos[1] += 1
+        path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        # One left step
+        currentPos[1] -= 1
+        path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    #Does this need a special case when theyre on the end of the same aisle?? Yes.
+    #Gonna take one horizontal step, go down/up then do rest of horizontal.
+    elif (Arow <= 2 and (matrixRows-3) <= Brow) or ((matrixRows-3) <= Arow and Brow <= 2):
+        #print("seven")
+        steps += abs(Acol - Bcol) + abs(Arow - Brow)
+
+        currentPos = itemA.copy()
+
+        #One horizontal step.
+        if Acol > Bcol:
+            currentPos[1] -= 1
+            path.append([currentPos[0], currentPos[1]])
+        else:
+            currentPos[1] += 1
+            path.append([currentPos[0], currentPos[1]])
+
+        verticalSteps = abs(Arow - Brow)
+        for i in range(1, verticalSteps + 1):
+            if Arow > Brow:
+                currentPos[0] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[0] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        horizontalSteps = abs(currentPos[1] - Bcol)
+        for i in range(1, horizontalSteps + 1):
+            if currentPos[1] > Bcol:
+                currentPos[1] -= 1
+                path.append([currentPos[0], currentPos[1]])
+            else:
+                currentPos[1] += 1
+                path.append([currentPos[0], currentPos[1]])
+
+        return steps, path
+
+    else:
+        print("Error. Something went wrong calculating a path between two items")
+        print(f"ItemA: {itemA}, ItemB {itemB}")
+
+    """
+    if (abs(itemA[1]-itemB[1]) == 0 and (itemA[1] % 3 == 0) and ((not (itemA[0] in [1, 2])) and (not (itemB[0] in [1, 2])))\
+            and (not (itemA[0] in [(len(store)-3), (len(store)-2)]) and not (itemB[0] in [(len(store)-3), (len(store)-2)]))):
         #Take one step right, go down aisle then go one back left.
         currentPos = itemA.copy()
         steps += 2 + abs(itemA[0] - itemB[0])
@@ -435,6 +699,7 @@ def findPath(itemA, itemB, store):
         return steps, path
         #Currently just checking whether in top/bot rows. Should add check for adjacent cols as well.
     elif (itemA[0] == 1) or (itemA[0] == 2) or (itemA[0] == len(store)-2) or (itemA[0] == len(store)-3):
+        print("two")
 
         steps += abs(itemA[1] - itemB[1]) + abs(itemA[0] - itemB[0])
         currentPos = itemA.copy()
@@ -537,7 +802,7 @@ def findPath(itemA, itemB, store):
                 path.append([currentPos[0], currentPos[1]])
 
 
-        return steps, path
+        return steps, path"""
 
 #Naive solution that places items in the order they're listed. No thought about distances.
 #Looks like its working!
@@ -719,7 +984,6 @@ def createAdjacencyMatrix(store, items):
 
     nodes = [fakeStart]
     nodes.extend(items)
-    print(nodes)
 
     adj = []
     for a in range(len(nodes)):
@@ -737,8 +1001,6 @@ def createAdjacencyMatrix(store, items):
                 adj[i][j], adj[j][i] = steps, steps
         i += 1
 
-    for i in adj:
-        print(i)
 
     return adj
 
@@ -781,7 +1043,7 @@ def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
             currentResult = currentWeight + adj[currentPath[level-1]][currentPath[level]]
 
             if currentResult < finalSteps:
-                finalPath = currentPath
+                finalPath[:layers + 1] = currentPath[:]
                 finalPath[layers] = currentPath[0]
                 finalSteps = currentResult
         return
@@ -845,8 +1107,9 @@ def branchAndBound(store, items):
 
     BnBHelper(adj, currentBound, 0, currentPath, 1, visited)
 
+
     #print("Final Steps: ", finalSteps)
-    #print("Final Path: ", finalPath)
+    #print("Final Path in BNB: ", finalPath)
 
     #print("items", items)
 
@@ -880,10 +1143,16 @@ start()
 #Known bug with one item! to do with 2ndmin function.
 #test = [[2, 8]]
 
-#printWithItems(basestore, [[2, 9], [3, 7]])
+"""printWithItems(basestore, [[3, 10], [1, 6]])
+steps, path = findPath([3, 10], [1, 6], basestore)
+print(path)"""
+
+#animateRoute(basestore, path, [[2, 3], [6, 3]])
+
 #branchAndBound(basestore, test)
 
 #steps, path, order = bruteForce(basestore, [[2, 9], [3, 7]])
 
 
 #animateRoute(basestore, path, [[2, 9], [3, 7]])
+
