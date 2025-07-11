@@ -56,6 +56,7 @@ baseitems = [[3, 2], [4, 2], [3, 11], [7, 10]]
 
 bigstart = [0, 19]
 
+#Minor function for finding the start position in a store
 def findDoor(store):
     # Finding start
     i = 0
@@ -66,6 +67,7 @@ def findDoor(store):
     start = [0, i]
     return start
 
+#Creates a store matrix based on a user's aisle and size inputs
 def buildStore(aisles, aisleLength):
     matrixWidth = 3 * aisles + 1
     matrixHeight = aisleLength + 6
@@ -92,6 +94,7 @@ def buildStore(aisles, aisleLength):
 
     return final
 
+#Menu helper that allows users to place items within their store
 def itemPlace(store):
     opt = input("Would you like a random set of items (R) or place them manually (M)?")
     items = []
@@ -108,10 +111,10 @@ def itemPlace(store):
             item = input("Enter the item you wish to place (Q to quit):\n")
         return textListToCoordList(items, store)
 
+#Animates the route taken through the store
 def animateRoute(store, path, items):
 
     start = findDoor(store)
-
     items = printWithItems(store, items, start)
 
     for i in path:
@@ -120,6 +123,7 @@ def animateRoute(store, path, items):
         time.sleep(0.25)
 
 
+#Main menu function
 def start():
     storeChoice = ""
     while storeChoice != "1" and storeChoice != "2" and storeChoice != "3":
@@ -141,7 +145,6 @@ Which store would you like to use?
         else:
             print("Invalid option chosen.")
 
-    time.sleep(0.2)
     items = []
     printWithItems(store, items)
 
@@ -171,7 +174,6 @@ Which store would you like to use?
 4. Greedy Algorithm
 5. Branch and Bound (WIP)
 : """)
-                    time.sleep(0.2)
 
                 if algo == "1":
                     print("Running First Solution Found Algorithm on your store:")
@@ -238,13 +240,6 @@ Which store would you like to use?
                     print("Full Route: " + str(result[1]))
                     print("Item Order: " + str(result[2]))
 
-                    # Testing stuff
-
-
-
-
-
-
         elif optionChoice == "3":
             start()
         elif optionChoice == "4":
@@ -266,10 +261,8 @@ Which store would you like to use?
 #empty to allow walking between aisles, then no matter if there are walls preventing our initial strategy,
 #The maximum amount of vertical steps will be m - 3
 
+#Random item position generator
 def generatePositions(amt, store):
-
-    #matrixWidth = 3 * aisles + 1
-    #matrixHeight = aisleLength + 6
 
     numAisles = int((len(store[0]) - 1) / 3)
     aisleHeight = int(len(store) - 6)
@@ -371,14 +364,10 @@ def printWithItems(store, itemList, person=[]):
 
     return itemList
 
+#Convert a coordinate to a text representation
+#I am using the notation that I was taught, in the format
+# [Aisle number + Position (Left, Right, Top, Bottom) + Bay number within the aisle]
 def coordToText(input, store):
-    #How to convert from coordinates to code?
-    #vertical is simple addition
-    #for column... 1 = 1L, 2 = 1R,
-
-    #fuck it i cba to do this right now.
-
-    #e.g. [10, 5]
 
     door = findDoor(store)
     if input == [door[0]+1, door[1]]:
@@ -411,6 +400,7 @@ def coordToText(input, store):
     text += str(bay)
     return text
 
+#converts a list of coordinates to a list of text positions
 def coordListtoTextList(inputList, store):
     out = []
     for input in inputList:
@@ -419,7 +409,7 @@ def coordListtoTextList(inputList, store):
 
     return out
 
-
+#converts a text position to coordinates in a given store
 def textToCoord(input, store):
     #Currently no way to address top and bottom rows of the store, maybe add soon?
     aisle = input[0]
@@ -447,6 +437,7 @@ def textToCoord(input, store):
     Row = (len(store)-3) - int(bay)
     return Row, Col
 
+#converts a list of text positions to a list of coordinates
 def textListToCoordList(inputList, store):
     out = []
     for input in inputList:
@@ -460,25 +451,8 @@ def textListToCoordList(inputList, store):
 #Find shortest path between two specified items in a given store
 def findPath(itemA, itemB, store):
     steps = 0
-    #Right now im unsure how to represent the paths, should they include start and dest?
+
     path = []
-
-    #Note!! Currently my logic assumes that the start/end point is not on the same column as a wall.
-    #As otherwise it would sidestep into the wall next to the entrance before going down. Which is not good.
-
-
-    #bugfix! Currently if two items are both in the top two/bottom two rows, it does an extra sidestep.
-    #only really relevant rn when moving off from start/back to end.
-
-    #This bugfix created a new bug!
-
-    #Rewriting this function
-    #Current cases: ###
-    #1. Items inside the same aisle
-    #2. Items inside different aisles
-    #3. One item on outside of aisle, one inside.
-    #4. Both items outside of aisles.
-
 
     Arow, Acol, Brow, Bcol = itemA[0], itemA[1], itemB[0], itemB[1]
 
@@ -720,15 +694,10 @@ def findPath(itemA, itemB, store):
         print(f"ItemA: {itemA}, ItemB {itemB}")
 
 #Naive solution that places items in the order they're listed. No thought about distances.
-#Looks like its working!
 def firstSolution(store, items):
     steps = 1
 
-    #Change to mean we don't need to pass start in, it will find it itself.
     start = findDoor(store)
-
-    #Program runs into difficulty when dealing with the start zone, since its a row above. TO solve this, im gonna
-    #basically make the square in front the start/stop, then manually make the first/final steps.
 
     fakeStart = [start[0]+1, start[1]]
     finalpath = [fakeStart]
@@ -751,7 +720,7 @@ def firstSolution(store, items):
     return steps, finalpath, stops
 
 
-
+#Trys every possible permutation of item visits, returns the one with least steps
 def bruteForce(store, items):
     perms = []
     for perm in permutations(items):
@@ -770,6 +739,7 @@ def bruteForce(store, items):
 
     return bestSteps, bestPath, bestOrder
 
+#Performs a locally optimising greedy algorithm, selecting the closest unvisited item at each position
 def greedyAlgo(store, items):
 
     start = findDoor(store)
@@ -819,11 +789,9 @@ def greedyAlgo(store, items):
     return steps, path, order
 
 #Improved brute force helper function, returns 0 0 0 if the current solution is worse than the best seen.
+#This needs some rewriting!
 def improvedBFHelper(store, start, items, best):
     steps = 1
-
-    # Program runs into difficulty when dealing with the start zone, since its a row above. TO solve this, im gonna
-    # basically make the square in front the start/stop, then manually make the first/final steps.
 
     fakeStart = [start[0] + 1, start[1]]
     finalpath = [fakeStart]
@@ -841,6 +809,7 @@ def improvedBFHelper(store, start, items, best):
 
         if steps > best:
             return 0, 0, 0
+
     finalpath.append(start)
     steps += 1
 
@@ -848,9 +817,6 @@ def improvedBFHelper(store, start, items, best):
         return 0, 0, 0
 
     return steps, finalpath, stops
-
-
-
 
 #Improved brute force: will be the same, but if a solution exceeds the current best seen, then it will not be considered further.
 def improvedBruteForce(store, items):
@@ -873,6 +839,7 @@ def improvedBruteForce(store, items):
 
     return bestSteps, bestPath, bestOrder
 
+#Helper function for Branch and Bound Algorithm
 def createAdjacencyMatrix(store, items):
 
     start = findDoor(store)
@@ -900,6 +867,7 @@ def createAdjacencyMatrix(store, items):
 
     return adj
 
+#Returns the closest item's distance in a row of the adjacency matrix
 def firstMin(adj, i):
     min = 100000
     for k in range(len(adj[0])):
@@ -908,6 +876,7 @@ def firstMin(adj, i):
 
     return min
 
+#Returns the closest two items distances in a row of the adjacency matrix
 def secondMin(adj, i):
     first, second = 100000, 100000
     for j in range(len(adj[0])):
@@ -923,6 +892,7 @@ def secondMin(adj, i):
 
     return second
 
+#The main recursion element of my BnB implementation
 def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
     global finalSteps
     global finalPath
@@ -965,6 +935,8 @@ def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
                 if currentPath[j] != -1:
                     visited[currentPath[j]] = True
 
+#Main BnB function. uses global variables to keep track of branches, and does not explore futher if they
+#cannot produce a result better than the best seen so far
 def branchAndBound(store, items):
     global finalSteps
     global finalPath
@@ -972,7 +944,7 @@ def branchAndBound(store, items):
         #New func for this?
         #NOTE: For this to work, we need to consider fakestart as a location in the adjacency matrix (node 0)
 
-    #Idea taken closely from geeksforgeekscode lmao
+    #Idea taken closely from geeksforgeeks code
     adj = createAdjacencyMatrix(store, items)
 
     layers = len(adj[0])
@@ -993,13 +965,6 @@ def branchAndBound(store, items):
 
     BnBHelper(adj, currentBound, 0, currentPath, 1, visited)
 
-
-    #print("Final Steps: ", finalSteps)
-    #print("Final Path in BNB: ", finalPath)
-
-    #print("items", items)
-
-    #Need to convert to regular format, plus add two for final/first steps.
     finalSteps += 2
 
     fullPath = []
@@ -1025,13 +990,3 @@ finalPath = []
 finalSteps = 100000
 
 start()
-
-#test = [[2, 8]]
-
-
-"""printWithItems(basestore, [[1, 6], [6, 3]])
-steps, path = findPath([1, 6], [6, 3], basestore)
-print(path)
-
-animateRoute(basestore, path, [[1, 6], [6, 3]])"""
-
