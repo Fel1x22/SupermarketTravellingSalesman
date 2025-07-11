@@ -2,6 +2,7 @@ from itertools import permutations
 from random import choice
 import time
 import os
+import math
 
 #TODO:
 #Change program to work with stores of any size: multiple functions
@@ -123,11 +124,12 @@ def start():
     storeChoice = ""
     while storeChoice != "1" and storeChoice != "2" and storeChoice != "3":
         storeChoice = input("""
-    Which store would you like to use?
-    1. Small
-    2. Large
-    3. Custom
-    : """)
+Which store would you like to use?
+1. Small
+2. Large
+3. Custom
+: """)
+
         if storeChoice == "1":
             store = basestore
         elif storeChoice == "2":
@@ -139,18 +141,18 @@ def start():
         else:
             print("Invalid option chosen.")
 
+    time.sleep(0.2)
     items = []
     printWithItems(store, items)
 
     while True:
         print("")
         print("What would you like to do?")
-        optionChoice = input("""
-    1. Chose item locations
-    2. Run an algorithm on your store
-    3. Return to store select
-    4. Quit
-    : """)
+        optionChoice = input("""1. Chose item locations
+2. Run an algorithm on your store
+3. Return to store select
+4. Quit
+: """)
 
         if optionChoice == "1":
             items = itemPlace(store)
@@ -169,6 +171,7 @@ def start():
 4. Greedy Algorithm
 5. Branch and Bound (WIP)
 : """)
+                    time.sleep(0.2)
 
                 if algo == "1":
                     print("Running First Solution Found Algorithm on your store:")
@@ -177,8 +180,7 @@ def start():
                     result = list(firstSolution(store, items))
                     timeTaken = time.time() - t
                     print("Steps taken: " + str(result[0]))
-                    print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(coordListtoTextList(result[2], store)))
                     print("Time taken: " + str(round(timeTaken*1000, 4)) + "ms")
                 if algo == "2":
                     print("Running Brute Force Algorithm on your store:")
@@ -187,8 +189,7 @@ def start():
                     result = list(bruteForce(store, items))
                     timeTaken = time.time() - t
                     print("Steps taken: " + str(result[0]))
-                    print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(coordListtoTextList(result[2], store)))
                     print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
                 if algo == "3":
                     print("Running Brute Force with Pruning Algorithm on your store:")
@@ -197,8 +198,7 @@ def start():
                     result = list(improvedBruteForce(store, items))
                     timeTaken = time.time() - t
                     print("Steps taken: " + str(result[0]))
-                    print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(coordListtoTextList(result[2], store)))
                     print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
                 if algo == "4":
                     print("Running Greedy Algorithm on your store:")
@@ -207,8 +207,7 @@ def start():
                     result = list(greedyAlgo(store, items))
                     timeTaken = time.time() - t
                     print("Steps taken: " + str(result[0]))
-                    print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(coordListtoTextList(result[2], store)))
                     print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
                 if algo == "5":
                     print("Running Branch and Bound Algorithm on your store:")
@@ -217,20 +216,30 @@ def start():
                     result = list(branchAndBound(store, items))
                     timeTaken = time.time() - t
                     print("Steps taken: " + str(result[0]))
-                    print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(coordListtoTextList(result[2], store)))
                     print("Time taken: " + str(round(timeTaken * 1000, 4)) + "ms")
 
+                print("")
                 print("Animate the route taken? Y/N (Note: only works in terminal.)")
                 anim = input(":")
-                if anim == "Y":
+                if anim.upper() == "Y":
                     animateRoute(store, result[1], items.copy())
 
                     #Testing stuff
                     print("Full Route: " + str(result[1]))
-                    print("Item Order: " + str(result[2]))
+                    print("Item Order: " + " -> ".join(result[2]))
                     print("Actual Items: " + str(items))
                     printWithItems(store, items)
+
+                print("")
+                print("More Details? Y/N")
+                detail = input(":")
+                if detail.upper() == "Y":
+                    print("Full Route: " + str(result[1]))
+                    print("Item Order: " + str(result[2]))
+
+                    # Testing stuff
+
 
 
 
@@ -361,6 +370,55 @@ def printWithItems(store, itemList, person=[]):
         print("•" + storePic[line])
 
     return itemList
+
+def coordToText(input, store):
+    #How to convert from coordinates to code?
+    #vertical is simple addition
+    #for column... 1 = 1L, 2 = 1R,
+
+    #fuck it i cba to do this right now.
+
+    #e.g. [10, 5]
+
+    door = findDoor(store)
+    if input == [door[0]+1, door[1]]:
+        text = "Start"
+        return text
+
+    text = ""
+
+    numAisles = int((len(store[0]) - 1) / 3)
+    aisleHeight = int(len(store) - 6)
+
+    aisle = math.ceil(input[1] / 3)
+    text += str(aisle)
+
+    if input[1] % 3 == 0:
+        aisle -= 1
+        if input[0] == 2:
+            text += "T"
+        else:
+            text += "B"
+
+        return text
+    elif input[1] % 3 == 1:
+        text += "L"
+    else:
+        text += "R"
+
+    bay = len(store) - 3 - input[0]
+
+    text += str(bay)
+    return text
+
+def coordListtoTextList(inputList, store):
+    out = []
+    for input in inputList:
+        text = coordToText(input, store)
+        out.append(text)
+
+    return out
+
 
 def textToCoord(input, store):
     #Currently no way to address top and bottom rows of the store, maybe add soon?
@@ -870,11 +928,6 @@ def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
     global finalPath
     layers = len(adj[0])
 
-    #print("level: ", level)
-    #print("currentWeight: ", currentWeight)
-    #print("currentPath: ", currentPath)
-    #print("currentBound: ", currentBound)
-
     if level == layers:
 
         if adj[currentPath[level-1]][currentPath[level]] != 0:
@@ -887,9 +940,7 @@ def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
         return
 
     for i in range(layers):
-        #print("hello")
         if (adj[currentPath[level-1]][i] != 0 and visited[i] == False):
-            #print("taken!")
             temp = currentBound
             currentWeight += adj[currentPath[level-1]][i]
 
@@ -899,9 +950,6 @@ def BnBHelper(adj, currentBound, currentWeight, currentPath, level, visited):
             else:
                 currentBound -= ((secondMin(adj, currentPath[level - 1]) +
                                 firstMin(adj, i)) / 2)
-
-            #print(currentBound)
-            #print(currentWeight)
 
             if currentBound + currentWeight < finalSteps:
                 currentPath[level] = i
@@ -972,25 +1020,18 @@ def branchAndBound(store, items):
 
     return finalSteps, fullPath, itemPath
 
+#Should probably find a better way around this.
 finalPath = []
 finalSteps = 100000
 
 start()
-#test = [[2, 8], [3, 7]]
 
-#Known bug with one item! to do with 2ndmin function.
 #test = [[2, 8]]
 
-"""printWithItems(basestore, [[3, 10], [1, 6]])
-steps, path = findPath([3, 10], [1, 6], basestore)
-print(path)"""
 
-#animateRoute(basestore, path, [[2, 3], [6, 3]])
+"""printWithItems(basestore, [[1, 6], [6, 3]])
+steps, path = findPath([1, 6], [6, 3], basestore)
+print(path)
 
-#branchAndBound(basestore, test)
-
-#steps, path, order = bruteForce(basestore, [[2, 9], [3, 7]])
-
-
-#animateRoute(basestore, path, [[2, 9], [3, 7]])
+animateRoute(basestore, path, [[1, 6], [6, 3]])"""
 
